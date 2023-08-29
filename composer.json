@@ -1,0 +1,13 @@
+{
+  "name": "agilecologne/lexoffice-script",
+  "description": "PHP Client für lexoffice REST API
+Wir lieben Automatisierung und die nahtlose Verzahnung von Systemen!
+lexoffice stellt seinen Kunden eine öffentliche API-Schnittstelle zur Verfügung über die bestehende Systeme integriert und Prozesse automatisiert werden können. Für diesen Ansatz haben wir einen PHP-Client entwickelt und stellen diesen kostenfrei zur Verfügung.",
+  "license": "GNU Affero General Public License v3.0",
+  "authors": [
+    {
+      "name": " Baebeca Solutions GmbH",
+      "email": "support@baebeca.de"
+    }
+  ]
+}
