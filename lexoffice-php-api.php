@@ -1282,15 +1282,6 @@ class lexoffice_client {
                 'physical_good' => $physical_good,
             ]);
         }
-
-        throw new lexoffice_exception('lexoffice-php-api: unknown booking scenario, cannot decide correct booking category', [
-            'taxrate' => $taxrate,
-            'country_code' => $country_code,
-            'date' => $date,
-            'european_vatid' => $euopean_vatid,
-            'b2b_business' => $b2b_business,
-            'physical_good' => $physical_good,
-        ]);
     }
 
     /**
