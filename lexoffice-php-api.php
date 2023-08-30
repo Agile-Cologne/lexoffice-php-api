@@ -24,6 +24,9 @@ class lexoffice_client {
     private $rate_limit_repeat, $rate_limit_seconds, $rate_limit_max_tries, $rate_limit_callable;
     private $ssl_verify;
 
+    /**
+     * @throws lexoffice_exception
+     */
     public function __construct($settings) {
         if (!is_array($settings)) throw new lexoffice_exception('lexoffice-php-api: settings should be an array');
         if (!array_key_exists('api_key', $settings)) throw new lexoffice_exception('lexoffice-php-api: no api_key is given');
@@ -383,6 +386,9 @@ class lexoffice_client {
         unset($this->api_key);
     }
 
+    /**
+     * @throws lexoffice_exception
+     */
     protected function api_call($type, $resource, $uuid = '', $data = '', $params = '', $return_http_header = false, int $count = 1) {
         // check api_key
         if ($this->api_key === true || $this->api_key === false || $this->api_key === '') throw new lexoffice_exception('lexoffice-php-api: invalid API Key', ['api_key' => $this->api_key]);
@@ -573,6 +579,9 @@ class lexoffice_client {
         }
     }
 
+    /**
+     * @throws lexoffice_exception
+     */
     public function create_event($event, $callback = false) {
         if (!$callback) $callback = $this->callback;
         if ($callback) {
@@ -582,6 +591,9 @@ class lexoffice_client {
         }
     }
 
+    /**
+     * @throws lexoffice_exception
+     */
     public function create_contact(array $data) {
         $data = $this->validate_contact_data($data);
 
@@ -600,10 +612,16 @@ class lexoffice_client {
         return $new_contact;
     }
 
+    /**
+     * @throws lexoffice_exception
+     */
     public function create_quotation($data, $finalized = false) {
         return $this->api_call('POST', 'quotations', '', $data, ($finalized ? '?finalize=true' : ''));
     }
 
+    /**
+     * @throws lexoffice_exception
+     */
     public function create_creditnote($data, $finalized = false, $linked_invoice_id = '') {
         $params_url = '';
         $params = [];
@@ -615,36 +633,60 @@ class lexoffice_client {
         return $this->api_call('POST', 'credit-notes', '', $data, $params_url);
     }
 
+    /**
+     * @throws lexoffice_exception
+     */
     public function create_invoice($data, $finalized = false) {
         //todo some validation checks
         return $this->api_call('POST', 'invoices', '', $data, ($finalized ? '?finalize=true' : ''));
     }
 
+    /**
+     * @throws lexoffice_exception
+     */
     public function create_orderconfirmation($data) {
         //todo some validation checks
         return $this->api_call('POST', 'order-confirmations', '', $data);
     }
 
+    /**
+     * @throws lexoffice_exception
+     */
     public function create_voucher($data) {
         return $this->api_call('POST', 'vouchers', '', $data);
     }
 
+    /**
+     * @throws lexoffice_exception
+     */
     public function create_delivery_note($data) {
         return $this->api_call('POST', 'delivery-notes', '', $data);
     }
 
+    /**
+     * @throws lexoffice_exception
+     */
     public function get_event($uuid) {
         return $this->api_call('GET', 'event-subscriptions', $uuid);
     }
 
+    /**
+     * @throws lexoffice_exception
+     */
     public function get_events_all() {
         return $this->api_call('GET', 'event-subscriptions');
     }
 
+    /**
+     * @throws lexoffice_exception
+     */
     public function get_contact($uuid) {
         return $this->api_call('GET', 'contacts', $uuid);
     }
 
+    /**
+     * @throws lexoffice_exception
+     */
     public function get_contacts_all() {
         $result = $this->api_call('GET', 'contacts', '', '', '?page=0&size=250&direction=ASC&property=name');
         $contacts = $result->content;
@@ -660,10 +702,16 @@ class lexoffice_client {
         return($contacts);
     }
 
+    /**
+     * @throws lexoffice_exception
+     */
     public function get_invoice($uuid) {
         return $this->api_call('GET', 'invoices', $uuid);
     }
 
+    /**
+     * @throws lexoffice_exception
+     */
     public function get_invoices_all() {
         $result = $this->api_call('GET', 'voucherlist', '', '', '?page=0&size=100&sort=voucherNumber,DESC&voucherType=invoice,creditnote&voucherStatus=open,paid,paidoff,voided,transferred');
         $vouchers = $result->content;
@@ -679,6 +727,9 @@ class lexoffice_client {
         return($vouchers);
     }
 
+    /**
+     * @throws lexoffice_exception
+     */
     public function get_last_invoices($count) {
         if ($count <= 0) throw new lexoffice_exception('lexoffice-php-api: positive invoice count needed');
 
@@ -710,24 +761,39 @@ class lexoffice_client {
         }
     }
 
+    /**
+     * @throws lexoffice_exception
+     */
     public function get_down_payment_invoice($uuid) {
         return $this->api_call('GET', 'down-payment-invoices', $uuid);
     }
 
+    /**
+     * @throws lexoffice_exception
+     */
     public function get_quotation($uuid) {
         return $this->api_call('GET', 'quotations', $uuid);
     }
 
+    /**
+     * @throws lexoffice_exception
+     */
     public function get_orderconfirmation($uuid) {
         return $this->api_call('GET', 'order-confirmations', $uuid);
     }
 
+    /**
+     * @throws lexoffice_exception
+     */
     public function get_deliverynote($uuid) {
         return $this->api_call('GET', 'delivery-notes', $uuid);
     }
 
     /* legacy function - will be removed in futere releases */
     /* use get_pdf($type, $uuid, $filename) instead */
+    /**
+     * @throws lexoffice_exception
+     */
     public function get_invoice_pdf($uuid, $filename) {
         // check if invoice is a draft
         $invoice = $this->get_invoice($uuid);
@@ -736,6 +802,9 @@ class lexoffice_client {
         return $this->get_pdf('invoices', $uuid, $filename);
     }
 
+    /**
+     * @throws lexoffice_exception
+     */
     public function get_pdf($type, $uuid, $filename): bool {
         if ($type === 'downpaymentinvoice') {
             $request = $this->get_down_payment_invoice($uuid);
@@ -761,10 +830,16 @@ class lexoffice_client {
         }
     }
 
+    /**
+     * @throws lexoffice_exception
+     */
     public function get_voucher($uuid) {
         return $this->api_call('GET', 'vouchers', $uuid);
     }
 
+    /**
+     * @throws lexoffice_exception
+     */
     public function get_vouchers(
         $type = 'invoice,creditnote,orderconfirmation',
         $state = 'draft,open,paid,paidoff,voided,accepted,rejected',
@@ -850,6 +925,9 @@ class lexoffice_client {
         return [];
     }
 
+    /**
+     * @throws lexoffice_exception
+     */
     public function get_voucher_files($uuid, $filename_prefix): array {
         // must get voucher files before
         $voucher = $this->get_voucher($uuid);
@@ -889,21 +967,34 @@ class lexoffice_client {
         return $saved_files;
     }
 
+    /**
+     * @throws lexoffice_exception
+     */
     public function get_voucher_payments($uuid) {
         return $this->api_call('GET', 'payments', $uuid);
     }
 
     private $cache_profile = null;
+
+    /**
+     * @throws lexoffice_exception
+     */
     public function get_profile() {
         if (!is_null($this->cache_profile)) return $this->cache_profile;
         $this->cache_profile = $this->api_call('GET', 'profile');
         return $this->cache_profile;
     }
 
+    /**
+     * @throws lexoffice_exception
+     */
     public function get_creditnote($uuid) {
         return $this->api_call('GET', 'credit-notes', $uuid);
     }
 
+    /**
+     * @throws lexoffice_exception
+     */
     public function update_contact($uuid, $data) {
         return $this->api_call('PUT', 'contacts', $uuid, $data);
     }
@@ -913,10 +1004,16 @@ class lexoffice_client {
     #
     #}
 
+    /**
+     * @throws lexoffice_exception
+     */
     public function delete_event($uuid) {
         return $this->api_call('DELETE', 'event-subscriptions', $uuid);
     }
 
+    /**
+     * @throws lexoffice_exception
+     */
     public function search_contact(array $filters, bool $wildcards = false) {
         // todo integrate pagination
 
@@ -971,6 +1068,9 @@ class lexoffice_client {
 
     // todo check lifetime api key
 
+    /**
+     * @throws lexoffice_exception
+     */
     public function upload_file($file) {
         if (!file_exists($file)) throw new lexoffice_exception('lexoffice-php-api: file does not exist', ['file' => $file]);
         if (filesize($file) > 5*1024*1024) throw new lexoffice_exception('lexoffice-php-api: filesize to big', ['file' => $file, 'filesize' => filesize($file).' byte']);
@@ -1000,6 +1100,9 @@ class lexoffice_client {
         return $this->api_call('POST', 'files', '', ['file' => new CURLFile($file, $mime_type, $dummy_title), 'type' => 'voucher']);
     }
 
+    /**
+     * @throws lexoffice_exception
+     */
     public function upload_voucher($uuid, $file) {
         if (!file_exists($file)) throw new lexoffice_exception('lexoffice-php-api: file does not exist', ['file' => $file]);
         if (filesize($file) > 5*1024*1024) throw new lexoffice_exception('lexoffice-php-api: filesize to big', ['file' => $file, 'filesize' => filesize($file).' byte']);
@@ -1031,6 +1134,9 @@ class lexoffice_client {
 
     /* Tax methods */
 
+    /**
+     * @throws lexoffice_exception
+     */
     public function is_tax_free_company(): bool {
         $profile = $this->get_profile();
         return !empty($profile->smallBusiness) && $profile->smallBusiness;
@@ -1440,10 +1546,16 @@ class lexoffice_client {
 
     /* legacy wrapper */
 
+    /**
+     * @throws lexoffice_exception
+     */
     public function get_credit_note($uuid) {
         return $this->get_creditnote($uuid);
     }
 
+    /**
+     * @throws lexoffice_exception
+     */
     public function create_credit_note($data, $finalized = false) {
         return $this->create_creditnote($data, $finalized);
     }
