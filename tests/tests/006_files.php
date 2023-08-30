@@ -11,7 +11,7 @@ try {
 		test_finished(false);
 	}
 
-} catch(lexoffice_exception $e) {
+} catch(LexofficeException $e) {
 	test($e->getMessage());
 	test(print_r($e->get_error(), true));
 	test_finished(false);
@@ -22,7 +22,7 @@ try {
 	$request = $lexoffice->upload_file(__DIR__.'\files\cat_5245kb.jpg');
 	test_finished(false);
 
-} catch(lexoffice_exception $e) {
+} catch(LexofficeException $e) {
 	if ($e->getMessage() == 'lexoffice-php-api: filesize to big') {
 		test_finished(true);
 	} else {
@@ -37,7 +37,7 @@ try {
 	$request = $lexoffice->upload_file(__DIR__.'\files\1337.jpg');
 	test_finished(false);
 
-} catch(lexoffice_exception $e) {
+} catch(LexofficeException $e) {
 	if ($e->getMessage() == 'lexoffice-php-api: file does not exist') {
 		test_finished(true);
 	} else {
@@ -52,7 +52,7 @@ try {
 	$request = $lexoffice->upload_file(__DIR__.'\files\libssh2.dll');
 	test_finished(false);
 
-} catch(lexoffice_exception $e) {
+} catch(LexofficeException $e) {
 	if ($e->getMessage() == 'lexoffice-php-api: invalid mime type') {
 		test_finished(true);
 	} else {
@@ -72,7 +72,7 @@ try {
         test_finished(false);
     }
 
-} catch(lexoffice_exception $e) {
+} catch(LexofficeException $e) {
     test($e->getMessage());
     test(print_r($e->get_error(), true));
     test_finished(false);

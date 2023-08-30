@@ -4,7 +4,7 @@ require_once(__DIR__.'/lexoffice-php-api.php');
 // please add your API Key
 $api_key = '';
 
-$lexoffice = new lexoffice_client(array(
+$lexoffice = new LexoffceClient(array(
 	'api_key' => $api_key
 ));
 

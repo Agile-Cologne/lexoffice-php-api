@@ -71,7 +71,7 @@ if ($create_tons_of_customers) {
                 test_finished(false);
             }
 
-        } catch(lexoffice_exception $e) {
+        } catch(LexofficeException $e) {
             test($e->getMessage());
             test(print_r($e->get_error(), true));
             test_finished(false);

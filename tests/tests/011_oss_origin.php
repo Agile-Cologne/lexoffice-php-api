@@ -15,7 +15,7 @@ try {
         test_finished(false);
     }
 }
-catch (lexoffice_exception $e) {
+catch (LexofficeException $e) {
     test($e->getMessage());
     test_finished(false);
 }
@@ -29,7 +29,7 @@ try {
         test_finished(false);
     }
 }
-catch (lexoffice_exception $e) {
+catch (LexofficeException $e) {
     test($e->getMessage());
     test_finished(false);
 }
@@ -43,7 +43,7 @@ try {
         test_finished(false);
     }
 }
-catch (lexoffice_exception $e) {
+catch (LexofficeException $e) {
     test($e->getMessage());
     test_finished(false);
 }
@@ -57,7 +57,7 @@ try {
         test_finished(false);
     }
 }
-catch (lexoffice_exception $e) {
+catch (LexofficeException $e) {
     test($e->getMessage());
     test_finished(false);
 }
@@ -71,7 +71,7 @@ try {
         test_finished(false);
     }
 }
-catch (lexoffice_exception $e) {
+catch (LexofficeException $e) {
     test($e->getMessage());
     test_finished(false);
 }
@@ -86,7 +86,7 @@ try {
         test_finished(false);
     }
 }
-catch (lexoffice_exception $e) {
+catch (LexofficeException $e) {
     test($e->getMessage());
     test_finished(false);
 }
@@ -100,7 +100,7 @@ try {
         test_finished(false);
     }
 }
-catch (lexoffice_exception $e) {
+catch (LexofficeException $e) {
     test($e->getMessage());
     test_finished(false);
 }
@@ -114,7 +114,7 @@ try {
         test_finished(false);
     }
 }
-catch (lexoffice_exception $e) {
+catch (LexofficeException $e) {
     test($e->getMessage());
     test_finished(false);
 }
@@ -128,7 +128,7 @@ try {
         test_finished(false);
     }
 }
-catch (lexoffice_exception $e) {
+catch (LexofficeException $e) {
     test($e->getMessage());
     test_finished(false);
 }
@@ -138,7 +138,7 @@ try {
     $request = $lexoffice->get_oss_voucher_category('GB', strtotime('2021-07-05'));
     test_finished(false);
 }
-catch (lexoffice_exception $e) {
+catch (LexofficeException $e) {
     if ($e->getMessage() === 'lexoffice-php-api: no possible OSS voucher category id') {
         test_finished(true);
     } else {
@@ -151,7 +151,7 @@ try {
     $request = $lexoffice->get_oss_voucher_category('DE', strtotime('2021-07-05'));
     test_finished(false);
 }
-catch (lexoffice_exception $e) {
+catch (LexofficeException $e) {
     if ($e->getMessage() === 'lexoffice-php-api: no possible OSS voucher category id') {
         test_finished(true);
     } else {
@@ -168,7 +168,7 @@ try {
         test_finished(false);
     }
 }
-catch (lexoffice_exception $e) {
+catch (LexofficeException $e) {
     test($e->getMessage());
     test_finished(false);
 }
@@ -182,7 +182,7 @@ try {
         test_finished(false);
     }
 }
-catch (lexoffice_exception $e) {
+catch (LexofficeException $e) {
     test($e->getMessage());
     test_finished(false);
 }
@@ -196,7 +196,7 @@ try {
         test_finished(false);
     }
 }
-catch (lexoffice_exception $e) {
+catch (LexofficeException $e) {
     test(print_r($e->get_error(), true));
     test_finished(false);
 }
@@ -206,7 +206,7 @@ try {
     $request = $lexoffice->get_needed_voucher_booking_id(23, 'PT', strtotime('2021-07-05'), true, false, true);
     test_finished(false);
 }
-catch (lexoffice_exception $e) {
+catch (LexofficeException $e) {
     test_finished($e->getMessage() === 'lexoffice-php-api: invalid OSS taxrate for given country');
 }
 
@@ -215,7 +215,7 @@ try {
     $request = $lexoffice->get_needed_voucher_booking_id(23, 'PT', strtotime('2021-07-05'), true, false, false);
     test_finished(false);
 }
-catch (lexoffice_exception $e) {
+catch (LexofficeException $e) {
     test_finished($e->getMessage() === 'lexoffice-php-api: invalid OSS taxrate for given country');
 }
 

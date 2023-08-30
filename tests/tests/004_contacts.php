@@ -52,7 +52,7 @@ try {
 		test_finished(false);
 	}
 
-} catch(lexoffice_exception $e) {
+} catch(LexofficeException $e) {
 	test($e->getMessage());
 	test(print_r($e->get_error(), true));
 	test_finished(false);
@@ -86,7 +86,7 @@ try {
         test_finished(false);
     }
 
-} catch(lexoffice_exception $e) {
+} catch(LexofficeException $e) {
     test($e->getMessage());
     test(print_r($e->get_error(), true));
     test_finished(false);
@@ -158,7 +158,7 @@ try {
 		test_finished(false);
 	}
 
-} catch(lexoffice_exception $e) {
+} catch(LexofficeException $e) {
 	test($e->getMessage());
 	test(print_r($e->get_error(), true));
 	test_finished(false);
@@ -181,7 +181,7 @@ try {
 		test_finished(false);
 	}
 
-} catch(lexoffice_exception $e) {
+} catch(LexofficeException $e) {
 	test($e->getMessage());
 	test(print_r($e->get_error(), true));
 	test_finished(false);
@@ -263,7 +263,7 @@ try {
                 'note' => '',
             ));
             test('contact updated - id: '.$request->id);
-        } catch(lexoffice_exception $e) {
+        } catch(LexofficeException $e) {
             test($e->getMessage());
             test(print_r($e->get_error(), true));
             test_finished(false);
@@ -274,7 +274,7 @@ try {
         test_finished(false);
     }
 
-} catch(lexoffice_exception $e) {
+} catch(LexofficeException $e) {
     test($e->getMessage());
     test(print_r($e->get_error(), true));
     test_finished(false);
@@ -346,7 +346,7 @@ try {
     }
 
 }
-catch(lexoffice_exception $e) {
+catch(LexofficeException $e) {
     test($e->getMessage());
     test(print_r($e->get_error(), true));
     test_finished(false);
@@ -370,7 +370,7 @@ try {
     }
 
 }
-catch(lexoffice_exception $e) {
+catch(LexofficeException $e) {
     test($e->getMessage());
     test(print_r($e->get_error(), true));
     test_finished(false);
@@ -393,7 +393,7 @@ try {
         test_finished(false);
     }
 
-} catch(lexoffice_exception $e) {
+} catch(LexofficeException $e) {
     test($e->getMessage());
     test(print_r($e->get_error(), true));
     test_finished(false);
@@ -411,7 +411,7 @@ try {
 	));
 	test_finished(false);
 
-} catch(lexoffice_exception $e) {
+} catch(LexofficeException $e) {
 	if ($e->getMessage() == 'lexoffice-php-api: search pattern must have least 3 characters') {
 		test_finished(true);
 	} else {
@@ -430,7 +430,7 @@ try {
 	));
 	test_finished(false);
 
-} catch(lexoffice_exception $e) {
+} catch(LexofficeException $e) {
 	if ($e->getMessage() == 'lexoffice-php-api: no valid filter for searching contacts') {
 		test_finished(true);
 	} else {
@@ -444,7 +444,7 @@ try {
     if (count($request) > 250) test_finished(true);
     test_finished(true);
 
-} catch(lexoffice_exception $e) {
+} catch(LexofficeException $e) {
 	if ($e->getMessage() == 'lexoffice-php-api: no valid filter for searching contacts') {
 		test_finished(false);
 	} else {
@@ -491,7 +491,7 @@ try {
         test_finished(false);
     }
 
-} catch(lexoffice_exception $e) {
+} catch(LexofficeException $e) {
     test($e->getMessage());
     test(print_r($e->get_error(), true));
     test_finished(false);
@@ -549,7 +549,7 @@ try {
         test_finished(false);
     }
 
-} catch(lexoffice_exception $e) {
+} catch(LexofficeException $e) {
     test($e->getMessage());
     test(print_r($e->get_error(), true));
     test_finished(false);
@@ -607,7 +607,7 @@ try {
         test_finished(false);
     }
 
-} catch(lexoffice_exception $e) {
+} catch(LexofficeException $e) {
     test($e->getMessage());
     test(print_r($e->get_error(), true));
     test_finished(false);
@@ -665,7 +665,7 @@ try {
         test_finished(false);
     }
 
-} catch(lexoffice_exception $e) {
+} catch(LexofficeException $e) {
     test($e->getMessage());
     test(print_r($e->get_error(), true));
     test_finished(false);
@@ -724,7 +724,7 @@ try {
         test_finished(false);
     }
 
-} catch(lexoffice_exception $e) {
+} catch(LexofficeException $e) {
     test($e->getMessage());
     test(print_r($e->get_error(), true));
     test_finished(false);

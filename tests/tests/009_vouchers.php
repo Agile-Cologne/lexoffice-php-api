@@ -26,7 +26,7 @@ try {
 	} else {
 		test_finished(false);
 	}
-} catch(lexoffice_exception $e) {
+} catch(LexofficeException $e) {
 	test($e->getMessage());
 	test(print_r($e->get_error(), true));
 	test_finished(false);
@@ -58,7 +58,7 @@ try {
 	} else {
 		test_finished(false);
 	}
-} catch(lexoffice_exception $e) {
+} catch(LexofficeException $e) {
 	test($e->getMessage());
 	test(print_r($e->get_error(), true));
 	test_finished(false);
@@ -99,7 +99,7 @@ try {
     } else {
         test_finished(false);
     }
-} catch(lexoffice_exception $e) {
+} catch(LexofficeException $e) {
     test($e->getMessage());
     test(print_r($e->get_error(), true));
     test_finished(false);
@@ -133,7 +133,7 @@ try {
     } else {
         test_finished(false);
     }
-} catch(lexoffice_exception $e) {
+} catch(LexofficeException $e) {
     test($e->getMessage());
     test(print_r($e->get_error(), true));
     test_finished(false);
@@ -168,7 +168,7 @@ try {
             $voucher_id = $request->id; // used in next test
             $lexoffice->upload_voucher($request->id, __DIR__.'/files/dummy.pdf');
             test_finished(true);
-        } catch(lexoffice_exception $e) {
+        } catch(LexofficeException $e) {
             test($e->getMessage());
             test(print_r($e->get_error(), true));
             test_finished(false);
@@ -176,7 +176,7 @@ try {
     } else {
         test_finished(false);
     }
-} catch(lexoffice_exception $e) {
+} catch(LexofficeException $e) {
     test($e->getMessage());
     test(print_r($e->get_error(), true));
     test_finished(false);
@@ -187,7 +187,7 @@ try {
     if (empty($voucher_id)) test_finished(false);
     $lexoffice->upload_voucher($voucher_id, __DIR__.'/files/dummy_2.pdf');
     test_finished(true);
-} catch(lexoffice_exception $e) {
+} catch(LexofficeException $e) {
     test($e->getMessage());
     test(print_r($e->get_error(), true));
     test_finished(false);

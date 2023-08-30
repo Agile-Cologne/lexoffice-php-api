@@ -22,7 +22,7 @@ $taxrate_7 = 7;
 /** local test configuration */
 
 if (!isset($sandbox)) $sandbox = false;
-$lexoffice = new lexoffice_client(array(
+$lexoffice = new LexoffceClient(array(
 	'api_key' => $api_key,
 	'ssl_verify' => false,
 	'sandbox' => $sandbox,

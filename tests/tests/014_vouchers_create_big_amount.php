@@ -42,7 +42,7 @@ if ($upload_vouchers_without_image) {
             } else {
                 test_finished(false);
             }
-        } catch(lexoffice_exception $e) {
+        } catch(LexofficeException $e) {
             test($e->getMessage());
             test(print_r($e->get_error(), true));
             test_finished(false);
@@ -87,7 +87,7 @@ if ($upload_vouchers_with_image) {
                 try {
                     $lexoffice->upload_voucher($request->id, __DIR__.'/files/dummy_2.pdf');
                     test('voucher uploaded');
-                } catch (lexoffice_exception $e2) {
+                } catch (LexofficeException $e2) {
                     test($e2->getMessage());
                     test(print_r($e2->get_error(), true));
                     test_finished(false);
@@ -95,7 +95,7 @@ if ($upload_vouchers_with_image) {
             } else {
                 test_finished(false);
             }
-        } catch(lexoffice_exception $e) {
+        } catch(LexofficeException $e) {
             test($e->getMessage());
             test(print_r($e->get_error(), true));
             test_finished(false);

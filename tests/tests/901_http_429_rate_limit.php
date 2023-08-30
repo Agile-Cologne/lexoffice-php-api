@@ -6,7 +6,7 @@ for ($i = 0; $i <= 20; $i++) {
     try {
         $request = $lexoffice->search_contact(['name' => 'ratelimit_'.rand(0, 99999999)]);
         test('request ...');
-    } catch (lexoffice_exception $e) {
+    } catch (LexofficeException $e) {
         if ($e->getMessage() == 'lexoffice-php-api: Rate limit exceeded') {
             $success = true;
             break;
@@ -23,7 +23,7 @@ for ($i = 0; $i <= 20; $i++) {
     try {
         $request = $lexoffice->search_contact(['name' => 'ratelimit_'.rand(0, 99999999)]);
         test('request ...');
-    } catch (lexoffice_exception $e) {
+    } catch (LexofficeException $e) {
         if ($e->getMessage() == 'lexoffice-php-api: Rate limit exceeded') {
             $success = false;
             break;
@@ -40,7 +40,7 @@ for ($i = 0; $i <= 20; $i++) {
     try {
         $request = $lexoffice->search_contact(['name' => 'ratelimit_'.rand(0, 99999999)]);
         test('request ...');
-    } catch (lexoffice_exception $e) {
+    } catch (LexofficeException $e) {
         if ($e->getMessage() == 'lexoffice-php-api: Rate limit exceeded') {
             $success = false;
             break;
@@ -59,7 +59,7 @@ for ($i = 0; $i <= 20; $i++) {
     try {
         $request = $lexoffice->search_contact(['name' => 'ratelimit_'.rand(0, 99999999)]);
         test('request ...');
-    } catch (lexoffice_exception $e) {
+    } catch (LexofficeException $e) {
         if ($e->getMessage() == 'lexoffice-php-api: Rate limit exceeded') {
             $success = true;
             break;

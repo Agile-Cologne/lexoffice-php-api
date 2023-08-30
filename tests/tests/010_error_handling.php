@@ -51,7 +51,7 @@ try {
 		test('try download pdf');
 		try {
 			$lexoffice->get_invoice_pdf($request->id, 'test.pdf');
-		} catch (lexoffice_exception $e) {
+		} catch (LexofficeException $e) {
 			test($e->getMessage());
 			if ($e->getMessage() == 'lexoffice-php-api: requested invoice is a draft. Cannot create/download pdf file. Check details via $e->get_error()') {
 				test_finished(true);
@@ -62,7 +62,7 @@ try {
 	} else {
 		test_finished(false);
 	}
-} catch (lexoffice_exception $e) {
+} catch (LexofficeException $e) {
 	test($e->getMessage());
 	test_finished(false);
 }

@@ -55,7 +55,7 @@ try {
 	} else {
 		test_finished(false);
 	}
-} catch(lexoffice_exception $e) {
+} catch(LexofficeException $e) {
 	test($e->getMessage());
 	test(print_r($e->get_error(), true));
 	test_finished(false);
@@ -119,7 +119,7 @@ try {
 	} else {
 		test_finished(false);
 	}
-} catch(lexoffice_exception $e) {
+} catch(LexofficeException $e) {
 	test($e->getMessage());
 	test(print_r($e->get_error(), true));
 	test_finished(false);
@@ -180,7 +180,7 @@ try {
 	} else {
 		test_finished(false);
 	}
-} catch(lexoffice_exception $e) {
+} catch(LexofficeException $e) {
 	test($e->getMessage());
 	test(print_r($e->get_error(), true));
 	test_finished(false);
@@ -240,7 +240,7 @@ try {
 	} else {
 		test_finished(false);
 	}
-} catch(lexoffice_exception $e) {
+} catch(LexofficeException $e) {
 	test($e->getMessage());
 	test(print_r($e->get_error(), true));
 	test_finished(false);
@@ -326,7 +326,7 @@ try {
 	} else {
 		test_finished(false);
 	}
-} catch(lexoffice_exception $e) {
+} catch(LexofficeException $e) {
 	test($e->getMessage());
 	test(print_r($e->get_error(), true));
 	test_finished(false);
@@ -412,7 +412,7 @@ try {
 	} else {
 		test_finished(false);
 	}
-} catch(lexoffice_exception $e) {
+} catch(LexofficeException $e) {
 	test($e->getMessage());
 	test(print_r($e->get_error(), true));
 	test_finished(false);
@@ -485,7 +485,7 @@ try {
     } else {
         test_finished(false);
     }
-} catch(lexoffice_exception $e) {
+} catch(LexofficeException $e) {
     test($e->getMessage());
     test(print_r($e->get_error(), true));
     test_finished(false);
@@ -545,7 +545,7 @@ try {
     } else {
         test_finished(false);
     }
-} catch(lexoffice_exception $e) {
+} catch(LexofficeException $e) {
     test($e->getMessage());
     test(print_r($e->get_error(), true));
     test_finished(false);
@@ -623,7 +623,7 @@ try {
 	} else {
 		test_finished(false);
 	}
-} catch(lexoffice_exception $e) {
+} catch(LexofficeException $e) {
 	test($e->getMessage());
 	test(print_r($e->get_error(), true));
 	test_finished(false);
@@ -641,7 +641,7 @@ try {
 	} else {
 		test_finished(false);
 	}
-} catch(lexoffice_exception $e) {
+} catch(LexofficeException $e) {
 	if ($e->getMessage() == 'lexoffice-php-api: positive invoice count needed') {
 		test_finished(true);
 	} else {
@@ -655,7 +655,7 @@ try {
 test_start('invoice - get last -5 invoices');
 try {
 	$request = $lexoffice->get_last_invoices(-5);
-} catch(lexoffice_exception $e) {
+} catch(LexofficeException $e) {
 	if ($e->getMessage() == 'lexoffice-php-api: positive invoice count needed') {
 		test_finished(true);
 	} else {
@@ -673,7 +673,7 @@ try {
 	} else {
 		test_finished(false);
 	}
-} catch(lexoffice_exception $e) {
+} catch(LexofficeException $e) {
 	if ($e->getMessage() == 'lexoffice-php-api: positive invoice count needed') {
 		test_finished(true);
 	} else {
@@ -691,7 +691,7 @@ try {
 	} else {
 		test_finished(false);
 	}
-} catch(lexoffice_exception $e) {
+} catch(LexofficeException $e) {
 	if ($e->getMessage() == 'lexoffice-php-api: positive invoice count needed') {
 		test_finished(true);
 	} else {
@@ -709,7 +709,7 @@ try {
 	} else {
 		test_finished(false);
 	}
-} catch(lexoffice_exception $e) {
+} catch(LexofficeException $e) {
 	if ($e->getMessage() == 'lexoffice-php-api: positive invoice count needed') {
 		test_finished(true);
 	} else {
@@ -727,7 +727,7 @@ try {
 	} else {
 		test_finished(false);
 	}
-} catch(lexoffice_exception $e) {
+} catch(LexofficeException $e) {
 	if ($e->getMessage() == 'lexoffice-php-api: positive invoice count needed') {
 		test_finished(true);
 	} else {
@@ -791,7 +791,7 @@ try {
     } else {
         test_finished(false);
     }
-} catch(lexoffice_exception $e) {
+} catch(LexofficeException $e) {
     test($e->getMessage());
     test(print_r($e->get_error(), true));
     test_finished(false);
