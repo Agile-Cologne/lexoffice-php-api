@@ -3,7 +3,6 @@
 namespace BaebecaSolutions\LexofficePhpApi;
 use Exception;
 
-include_once __DIR__ . "/vendor/autoload.php";
 class LexofficeException extends Exception
 {
     private $custom_error;

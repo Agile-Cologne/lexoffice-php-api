@@ -2,7 +2,6 @@
 namespace BaebecaSolutions\LexofficePhpApi;
 use CURLFile;
 
-include_once __DIR__ . "/vendor/autoload.php";
 /**
  * @copyright	2013-2020 | Baebeca Solutions GmbH
  * @author		Sebastian Lutz
