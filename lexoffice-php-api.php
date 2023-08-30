@@ -51,6 +51,7 @@ class lexoffice_client {
         $this->countries = (object)[
             /** nullrate | Nullsatz
              * https://europa.eu/youreurope/business/taxation/vat/vat-rules-rates/index_de.htm
+             *
              * Einige EU-Länder wenden auf bestimmte Umsätze einen Nullsatz an.
              * Bei Anwendung eines Nullsatzes muss der Verbraucher keine Mehrwertsteuer abführen,
              * Sie können jedoch Mehrwertsteuer, die Sie bei unmittelbar mit dem betreffenden Umsatz verbundenen
@@ -464,7 +465,7 @@ class lexoffice_client {
         curl_setopt($ch, CURLOPT_HEADER, $return_http_header);
         curl_setopt($ch, CURLOPT_USERAGENT, 'Baebeca Solutions GmbH - lexoffice-php-api | https://github.com/Baebeca-Solutions/lexoffice-php-api');
 
-        // skip ssl verify only if manual deactivated (eg. in local tests)
+        // skip ssl verify only if manual deactivated (e.g. in local tests)
         if (!$this->ssl_verify) {
             curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
@@ -899,7 +900,7 @@ class lexoffice_client {
                 unset($result_tmp, $tmp); // cleanup
 
                 // get next timespan, update +1 month
-                $date_from = date('Y-m-d', strtotime($date_to.'T00:00:00.000+01:00')+(60*60*25)); // +1 day (dont need same day twice)
+                $date_from = date('Y-m-d', strtotime($date_to.'T00:00:00.000+01:00')+(60*60*25)); // +1 day (don't need same day twice)
                 $date_to_timestamp = strtotime($date_from.'T00:00:00.000+01:00')+(60*60*24*30); // +1 month
                 // reduce if lower timeframe was set by user
                 if ($date_to_timestamp > $date_to_timestamp_end) $date_to_timestamp = $date_to_timestamp_end;
@@ -1143,7 +1144,7 @@ class lexoffice_client {
     }
 
     /**
-     * Check if the given country is member in the european union
+     * Check if the given country is member in the European Union
      * @param $country_code string 2-letter country code
      * @param $date int timestamp booking date
      * @return bool
@@ -1171,7 +1172,7 @@ class lexoffice_client {
         if ($this->is_tax_free_company()) return '7a1efa0e-6283-4cbf-9583-8e88d3ba5960'; // §19 Kleinunternehmer
 
         // Deutschland
-        if (strtoupper($country_code) == 'DE' && $physical_good) return '8f8664a8-fd86-11e1-a21f-0800200c9a66'; // Einnahmen -> Warenlieferung
+        if (strtoupper($country_code) == 'DE' && $physical_good) return '8f8664a8-fd86-11e1-a21f-0800200c9a66'; // Einnahmen → Warenlieferung
         if (strtoupper($country_code) == 'DE') return '8f8664a0-fd86-11e1-a21f-0800200c9a66'; // Einnahmen
 
         // Europa
@@ -1389,7 +1390,7 @@ class lexoffice_client {
         return false;
     }
 
-    /* One Stop Shop (OSS) */
+    /* One-Stop Shop (OSS) */
     /**
      * Check if for the current lexoffice settings and given country special OSS-Settings should be used
      * @param string $country_code 2-letter country code from the billing address
