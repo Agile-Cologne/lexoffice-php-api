@@ -1,5 +1,8 @@
 <?php
-require_once(__DIR__.'/../lexoffice-php-api.php');
+
+use BaebecaSolutions\LexofficePhpApi\LexofficeClient;
+
+require_once(__DIR__.'/../LexofficeClient.php');
 
 // if local developer test include secret api keys
 if (is_file(__DIR__.'/../_local_test_settings.php')) {
@@ -22,7 +25,7 @@ $taxrate_7 = 7;
 /** local test configuration */
 
 if (!isset($sandbox)) $sandbox = false;
-$lexoffice = new LexoffceClient(array(
+$lexoffice = new LexofficeClient(array(
 	'api_key' => $api_key,
 	'ssl_verify' => false,
 	'sandbox' => $sandbox,

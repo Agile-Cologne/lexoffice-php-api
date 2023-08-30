@@ -1,5 +1,8 @@
 <?php
+namespace BaebecaSolutions\LexofficePhpApi;
+use CURLFile;
 
+include_once __DIR__ . "/vendor/autoload.php";
 /**
  * @copyright	2013-2020 | Baebeca Solutions GmbH
  * @author		Sebastian Lutz
@@ -15,7 +18,7 @@
 
 // Official Lexoffice Documentation: https://developers.lexoffice.io/docs/
 
-class LexoffceClient {
+class LexofficeClient {
     protected $api_key = '';
     protected $api_endpoint = 'https://api.lexoffice.io';
     protected $callback = '';
@@ -1165,7 +1168,7 @@ class LexoffceClient {
      * @param bool $b2b_business customer is a b2b customer
      * @param bool $physical_good a physical good will be selled
      * @return string
-     * @throws \LexofficeException
+     * @throws LexofficeException
      */
     public function get_needed_voucher_booking_id(float $taxrate, string $country_code, int $date, bool $euopean_vatid, bool $b2b_business, bool $physical_good = true): string {
         // Weltweit, Kleinunternehmer
@@ -1390,7 +1393,7 @@ class LexoffceClient {
      *  bool    false           => no OSS needed, you can proceed without OSS stuff
      *  string  "origin"        => you have to use german taxrates
      *  string  "destination"   => you have to use OSS taxrates
-     * @throws \LexofficeException
+     * @throws LexofficeException
      */
     public function is_oss_needed(string $country_code, int $date) {
         if ($date <= 1625090400) return false; // 01.07.2021
@@ -1413,7 +1416,7 @@ class LexoffceClient {
      *  2 => Elektronische Dienstleistung
      * @param float|int $taxrate
      * @return string lexoffice voucher booking category id
-     * @throws \LexofficeException
+     * @throws LexofficeException
      */
     public function get_oss_voucher_category(string $country_code, int $date, int $booking_category = 1, $taxrate = 0): string {
         $oss_type = $this->is_oss_needed($country_code, $date);
@@ -1550,17 +1553,5 @@ class LexoffceClient {
      */
     public function create_credit_note($data, $finalized = false) {
         return $this->create_creditnote($data, $finalized);
-    }
-}
-
-class LexofficeException extends Exception {
-    private $custom_error;
-    public function __construct($message, $data = []) {
-        $this->custom_error = $data;
-        parent::__construct($message);
-    }
-
-    public function get_error() {
-        return $this->custom_error;
     }
 }

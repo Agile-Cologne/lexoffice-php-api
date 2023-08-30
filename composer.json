@@ -13,5 +13,9 @@
     "ext-curl": "*",
     "ext-json": "*",
     "ext-fileinfo": "*"
+  },"autoload": {
+  "psr-4": {
+    "BaebecaSolutions\\LexofficePhpApi\\": "/"
   }
+}
 }
