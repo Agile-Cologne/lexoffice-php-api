@@ -22,6 +22,7 @@ class lexoffice_client {
     protected $api_version = 'v1';
     protected $countries;
     private $rate_limit_repeat, $rate_limit_seconds, $rate_limit_max_tries, $rate_limit_callable;
+    private $ssl_verify;
 
     public function __construct($settings) {
         if (!is_array($settings)) throw new lexoffice_exception('lexoffice-php-api: settings should be an array');
