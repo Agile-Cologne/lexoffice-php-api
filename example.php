@@ -1,4 +1,7 @@
 <?php
+
+use BaebecaSolutions\LexofficePhpApi\LexofficeClient;
+
 require_once(__DIR__.'/lexoffice-php-api.php');
 
 // please add your API Key
