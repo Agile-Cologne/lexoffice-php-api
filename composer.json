@@ -9,6 +9,7 @@
     }
   ],
   "require": {
+    "php": "^8.2",
     "ext-curl": "*",
     "ext-json": "*",
     "ext-fileinfo": "*"
