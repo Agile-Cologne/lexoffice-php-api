@@ -7,5 +7,10 @@
       "name": " Baebeca Solutions GmbH",
       "email": "support@baebeca.de"
     }
-  ]
+  ],
+  "require": {
+    "ext-curl": "*",
+    "ext-json": "*",
+    "ext-fileinfo": "*"
+  }
 }
