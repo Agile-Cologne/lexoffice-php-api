@@ -9,10 +9,13 @@
     }
   ],
   "require": {
-    "php": "^8.2",
+    "php": "^8.3",
     "ext-curl": "*",
     "ext-json": "*",
-    "ext-fileinfo": "*"
+    "ext-fileinfo": "*",
+    "ext-intl": "*",
+    "ext-mbstring": "*",
+    "ext-openssl": "*"
   },"autoload": {
   "psr-4": {
     "BaebecaSolutions\\LexofficePhpApi\\": "/"

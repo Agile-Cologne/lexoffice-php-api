@@ -1,4 +1,7 @@
 <?php
+
+use BaebecaSolutions\LexofficePhpApi\LexofficeClient;
+
 require(__DIR__.'/../lexoffice-php-api.php');
 
 // if local developer test include secret api keys

@@ -25,7 +25,6 @@ class LexofficeClient {
     protected $api_version = 'v1';
     protected $countries;
     private $rate_limit_repeat, $rate_limit_seconds, $rate_limit_max_tries, $rate_limit_callable;
-    private $ssl_verify;
 
     /**
      * @throws LexofficeException
@@ -857,11 +856,11 @@ class LexofficeClient {
             $request_file = $this->api_call('GET', 'files', $documentFileId, 'application/xml');
             if ($request_file) file_put_contents($filename.'.xml', $request_file);
         }
-        catch (lexoffice_exception $e) {
+        catch (LexofficeException $e) {
+            /** @noinspection PhpStatementHasEmptyBodyInspection */
             if ($e->get_error()['HTTP Status'] === 404) {
                 // ingore it, it is not an X-Rechnung
-            }
-            elseif ($e->get_error()['HTTP Status'] === 500) {
+            } /** @noinspection PhpStatementHasEmptyBodyInspection */ elseif ($e->get_error()['HTTP Status'] === 500) {
                 // send if not an X-Rechnung
                 // todo lexoffice bug, wait for feedback from lex-dev (#223790)
             }
