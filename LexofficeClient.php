@@ -20,7 +20,8 @@ use CURLFile;
 class LexofficeClient {
     protected $api_key = '';
     protected $api_endpoint = 'https://api.lexoffice.io';
-    protected $callback = '';
+    protected $callback = false;
+    protected $ssl_verify = true;
     protected $api_version = 'v1';
     protected $countries;
     private $rate_limit_repeat, $rate_limit_seconds, $rate_limit_max_tries, $rate_limit_callable;
@@ -31,15 +32,15 @@ class LexofficeClient {
      */
     public function __construct($settings) {
         if (!is_array($settings)) throw new LexofficeException('lexoffice-php-api: settings should be an array');
-        if (!array_key_exists('api_key', $settings)) throw new LexofficeException('lexoffice-php-api: no api_key is given');
+        if (empty($settings['api_key'])) throw new LexofficeException('lexoffice-php-api: no api_key is given');
 
         $this->api_key = $settings['api_key'];
-        array_key_exists('callback', $settings) ? $this->callback = $settings['callback'] : $this->callback = false;
-        array_key_exists('ssl_verify', $settings) ? $this->ssl_verify = $settings['ssl_verify'] : $this->ssl_verify = true;
+        if (isset($settings['callback'])) $this->callback = $settings['callback'];
+        if (isset($settings['ssl_verify'])) $this->ssl_verify = $settings['ssl_verify'];
 
         // sandboxes
-        if (array_key_exists('sandbox', $settings) && $settings['sandbox'] === true) $this->api_endpoint = 'https://api-sandbox.grld.eu';
-        if (array_key_exists('sandbox_oss', $settings) && $settings['sandbox_oss'] === true) $this->api_endpoint = 'https://api-oss-sandbox.grld.eu';
+        if (isset($settings['sandbox']) && $settings['sandbox'] === true) $this->api_endpoint = 'https://api-sandbox.grld.eu';
+        if (isset($settings['sandbox_oss']) && $settings['sandbox_oss'] === true) $this->api_endpoint = 'https://api-oss-sandbox.grld.eu';
 
         $this->configure_rate_limit();
         $this->configure_rate_limit_callable();
@@ -403,10 +404,11 @@ class LexofficeClient {
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
 
             if ($resource == 'files') {
-                curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                    'Authorization: Bearer '.$this->api_key,
-                ]);
-            } else {
+                $header = ['Authorization: Bearer '.$this->api_key];
+                if (!empty($data)) $header[] = 'Accept: '.$data;
+                curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
+            }
+            else {
                 curl_setopt($ch, CURLOPT_HTTPHEADER, [
                     'Authorization: Bearer '.$this->api_key,
                     'Accept: application/json',
@@ -475,66 +477,36 @@ class LexofficeClient {
 
         $result = curl_exec($ch);
         $http_status = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+        $error = '';
 
         // prepare data for error message
         if ($data !== '' && is_string($data)) $data = json_decode($data);
 
-        if ($http_status == 200 || $http_status == 201 || $http_status == 202 || $http_status == 204) {
-            if (!empty($result) && $result && !($type == 'GET' && $resource == 'files') && !$return_http_header) {
+        // 200 ok, 201 created, 202 accepted
+        if (in_array($http_status, [200, 201, 202])) {
+            if (!empty($result) && !($type == 'GET' && $resource == 'files') && !$return_http_header) {
                 return json_decode($result);
                 // full http_header
-            } else if (!empty($result) && $result && $return_http_header) {
+            } else if (!empty($result) && $return_http_header) {
                 return ['header' => curl_getinfo($ch), 'body' => $result];
                 // binary or full http_header
-            } else if (!empty($result) && $result) {
+            } else if (!empty($result)) {
                 return $result;
             } else {
-                return true;
+                $error = 'empty response';
             }
         }
-        elseif ($http_status == 400) {
-            throw new LexofficeException('lexoffice-php-api: Malformed syntax or a bad query', [
-                'HTTP Status' => $http_status,
-                'Requested URI' => $curl_url,
-                'Requested Payload' => $data,
-                'Response' => json_decode($result),
-            ]);
-        }
-        elseif ($http_status == 401) {
-            throw new LexofficeException('lexoffice-php-api: invalid API Key', [
-                'HTTP Status' => $http_status,
-                'Requested URI' => $curl_url,
-                'Requested Payload' => $data,
-                'Response' => json_decode($result),
-            ]);
-        }
-        elseif ($http_status == 402) {
-            throw new LexofficeException('lexoffice-php-api: action not possible due a lexoffice contract issue');
-        }
-        elseif ($http_status == 403) {
-            throw new LexofficeException('lexoffice-php-api: Authenticated but insufficient scope or insufficient access rights in lexoffice', [
-                'HTTP Status' => $http_status,
-                'Requested URI' => $curl_url,
-                'Requested Payload' => $data,
-                'Response' => json_decode($result),
-            ]);
-        }
-        elseif ($http_status == 404) {
-            throw new LexofficeException('lexoffice-php-api: Requested resource does no exist (anymore)', [
-                'HTTP Status' => $http_status,
-                'Requested URI' => $curl_url,
-                'Requested Payload' => $data,
-                'Response' => json_decode($result),
-            ]);
-        }
-        elseif ($http_status == 405) {
-            throw new LexofficeException('lexoffice-php-api: Method not allowed on resource', [
-                'HTTP Status' => $http_status,
-                'Requested URI' => $curl_url,
-                'Requested Payload' => $data,
-                'Response' => json_decode($result),
-            ]);
-        }
+        // ok, but no content
+        elseif ($http_status == 204) { return true; }
+        elseif ($http_status == 400) { $error = 'Malformed syntax or a bad query'; }
+        elseif ($http_status == 401) { $error = 'invalid API Key'; }
+        elseif ($http_status == 402) { $error = 'action not possible due a lexoffice contract issue'; }
+        elseif ($http_status == 403) { $error = 'Authenticated but insufficient scope or insufficient access rights in lexoffice'; }
+        elseif ($http_status == 404) { $error = 'Requested resource does no exist (anymore)'; }
+        elseif ($http_status == 405) { $error = 'Method not allowed on resource'; }
+        elseif ($http_status == 406) { $error = 'Validation issues due to invalid data'; }
+        elseif ($http_status == 409) { $error = 'Conflict on ressource'; }
+        elseif ($http_status == 415) { $error = 'Missing/Unsupported Content-Type header'; }
         // rate limit, repeat it
         elseif (
             $http_status === 429 &&
@@ -548,38 +520,19 @@ class LexofficeClient {
         // rate limit exceeded
         elseif ($http_status === 429) {
             if (is_callable($this->rate_limit_callable)) call_user_func($this->rate_limit_callable, false);
-            throw new LexofficeException('lexoffice-php-api: Rate limit exceeded', [
-                'HTTP Status' => $http_status,
-                'Requested URI' => $curl_url,
-                'Requested Payload' => $data,
-                'Response' => json_decode($result),
-            ]);
+            $error = 'Rate limit exceeded';
         }
-        elseif ($http_status == 500) {
-            throw new LexofficeException('lexoffice-php-api: Internal server error.', [
-                'HTTP Status' => $http_status,
-                'Requested URI' => $curl_url,
-                'Requested Payload' => $data,
-                'Response' => json_decode($result),
-            ]);
-        }
-        elseif ($http_status == 503) {
-            throw new LexofficeException('lexoffice-php-api: API Service currently unavailable', [
-                'HTTP Status' => $http_status,
-                'Requested URI' => $curl_url,
-                'Requested Payload' => $data,
-                'Response' => json_decode($result),
-            ]);
-        }
-        else {
-            // all other codes https://developers.lexoffice.io/docs/#http-status-codes
-            throw new LexofficeException('lexoffice-php-api: error in api request - check details via $e->get_error()', [
-                'HTTP Status' => $http_status,
-                'Requested URI' => $curl_url,
-                'Requested Payload' => $data,
-                'Response' => json_decode($result),
-            ]);
-        }
+        elseif ($http_status == 500) { $error = 'Internal server error'; }
+        elseif ($http_status == 501) { $error = 'HTTP operation not supported'; }
+        elseif ($http_status == 503) { $error = 'API Service currently unavailable'; }
+        elseif ($http_status == 504) { $error = 'API Service Endpoint request timeout'; }
+
+        throw new LexofficeException('lexoffice-php-api: '.(!empty($error) ? $error : 'error in api request - check details via $e->get_error()'), [
+            'HTTP Status' => $http_status,
+            'Requested URI' => $curl_url,
+            'Requested Payload' => $data,
+            'Response' => json_decode($result),
+        ]);
     }
 
     /**
@@ -594,6 +547,40 @@ class LexofficeClient {
         }
     }
 
+    public function create_article(array|object $data) {
+        if (is_object($data)) $data = json_decode(json_encode($data, true), true);
+        //todo some validation checks
+        return $this->api_call('POST', 'articles', '', $data);
+    }
+
+    public function get_article($uuid) {
+        return $this->api_call('GET', 'articles', $uuid);
+    }
+
+    public function get_articles_all() {
+        $result = $this->api_call('GET', 'articles', '', '', '?page=0&size=250&direction=ASC&property=name');
+        $articles = $result->content;
+        unset($result->content);
+
+        for ($i = 1; $i < $result->totalPages; $i++) {
+            $result_page = $this->api_call('GET', 'articles', '', '', '?page='.$i.'&size=250&direction=ASC&property=name');
+            foreach ($result_page->content as $article) {
+                $articles[] = $article;
+            }
+            unset($result_page->content);
+        }
+        return($articles);
+    }
+
+    public function update_article($uuid, array|object $data) {
+        if (is_object($data)) $data = json_decode(json_encode($data, true), true);
+        //todo some validation checks
+        return $this->api_call('PUT', 'articles', $uuid, $data);
+    }
+
+    public function delete_article($uuid) {
+        return $this->api_call('DELETE', 'articles', $uuid);
+    }
     /**
      * @throws LexofficeException
      */
@@ -602,7 +589,28 @@ class LexofficeClient {
 
         // set version to 0 to create a new contact
         $data['version'] = 0;
-        $new_contact = $this->api_call('POST', 'contacts', '', $data);
+        try {
+            $new_contact = $this->api_call('POST', 'contacts', '', $data);
+        }
+        catch (LexofficeException $e) {
+            $error = $e->get_error();
+            // try again if new and account_number_already_exists | #188208
+            if (isset($error['Response']->IssueList[0]->i18nKey) && $error['Response']->IssueList[0]->i18nKey === 'account_number_already_exists') {
+                sleep(3);
+                try {
+                    $new_contact = $this->api_call('POST', 'contacts', '', $data);
+                }
+                catch (LexofficeException $e) {
+                    $error = $e->get_error();
+                    if (isset($error['Response']->IssueList[0]->i18nKey) && $error['Response']->IssueList[0]->i18nKey === 'account_number_already_exists') {
+                        sleep(3);
+                        $new_contact = $this->api_call('POST', 'contacts', '', $data);
+                    }
+                    else throw $e;
+                }
+            }
+            else throw $e;
+        }
 
         // #73917
         // support a technical race condition in lexoffice database system
@@ -647,9 +655,9 @@ class LexofficeClient {
     /**
      * @throws LexofficeException
      */
-    public function create_orderconfirmation($data) {
+    public function create_orderconfirmation($data, $finalized = false) {
         //todo some validation checks
-        return $this->api_call('POST', 'order-confirmations', '', $data);
+        return $this->api_call('POST', 'order-confirmations', '', $data, ($finalized ? '?finalize=true' : ''));
     }
 
     /**
@@ -662,8 +670,8 @@ class LexofficeClient {
     /**
      * @throws LexofficeException
      */
-    public function create_delivery_note($data) {
-        return $this->api_call('POST', 'delivery-notes', '', $data);
+    public function create_delivery_note($data, $finalized = false) {
+        return $this->api_call('POST', 'delivery-notes', '', $data, ($finalized ? '?finalize=true' : ''));
     }
 
     /**
@@ -678,6 +686,25 @@ class LexofficeClient {
      */
     public function get_events_all() {
         return $this->api_call('GET', 'event-subscriptions');
+    }
+
+    public function get_recurring_template($uuid) {
+        return $this->api_call('GET', 'recurring-templates', $uuid);
+    }
+
+    public function get_recurring_templates_all() {
+        $result = $this->api_call('GET', 'recurring-templates', '', '', '?page=0&size=250&sort=createdDate,ASC');
+        $recurring_templates = $result->content;
+        unset($result->content);
+
+        for ($i = 1; $i < $result->totalPages; $i++) {
+            $result_page = $this->api_call('GET', 'recurring-templates', '', '', '?page='.$i.'&size=250&sort=createdDate,ASC');
+            foreach ($result_page->content as $recurring_template) {
+                $recurring_templates[] = $recurring_template;
+            }
+            unset($result_page->content);
+        }
+        return($recurring_templates);
     }
 
     /**
@@ -792,8 +819,9 @@ class LexofficeClient {
         return $this->api_call('GET', 'delivery-notes', $uuid);
     }
 
-    /* legacy function - will be removed in futere releases */
-    /* use get_pdf($type, $uuid, $filename) instead */
+    /**
+    *  @deprecated use get_pdf($type, $uuid, $filename) instead / will be removed in futere releases
+    */
     /**
      * @throws LexofficeException
      */
@@ -812,25 +840,36 @@ class LexofficeClient {
         if ($type === 'downpaymentinvoice') {
             $request = $this->get_down_payment_invoice($uuid);
             if (empty($request->files->documentFileId)) return false;
-            $request_file = $this->api_call('GET', 'files', $request->files->documentFileId);
-            if ($request_file) {
-                file_put_contents($filename, $request_file);
-                return true;
-            }
-            return false;
+            $documentFileId = $request->files->documentFileId;
         }
         else {
             $request = $this->api_call('GET', $type, $uuid, '', '/document');
-            if ($request && isset($request->documentFileId)) {
-                $request_file = $this->api_call('GET', 'files', $request->documentFileId);
-                if ($request_file) {
-                    file_put_contents($filename, $request_file);
-                    return true;
-                }
-                return false;
-            }
-            return false;
+            if (empty($request->documentFileId)) return false;
+            $documentFileId = $request->documentFileId;
         }
+
+        $request_file = $this->api_call('GET', 'files', $documentFileId);
+        if (!$request_file) return false;
+        file_put_contents($filename, $request_file);
+
+        // check additonal X-Rechnung XML
+        try {
+            $request_file = $this->api_call('GET', 'files', $documentFileId, 'application/xml');
+            if ($request_file) file_put_contents($filename.'.xml', $request_file);
+        }
+        catch (lexoffice_exception $e) {
+            if ($e->get_error()['HTTP Status'] === 404) {
+                // ingore it, it is not an X-Rechnung
+            }
+            elseif ($e->get_error()['HTTP Status'] === 500) {
+                // send if not an X-Rechnung
+                // todo lexoffice bug, wait for feedback from lex-dev (#223790)
+            }
+            else {
+                throw $e;
+            }
+        }
+        return true;
     }
 
     /**
@@ -940,6 +979,7 @@ class LexofficeClient {
         $i = 1;
         $saved_files = [];
         foreach ($voucher->files as $uuid_file) {
+            $xRechnung = false;
             $request = $this->api_call('GET', 'files', $uuid_file, '', '', true);
 
             // unsused at the moment
@@ -958,6 +998,11 @@ class LexofficeClient {
                 case 'application/pdf':
                     $extension = 'pdf';
                     break;
+                case 'application/xml':
+                case 'text/xml':
+                    $extension = 'xml';
+                    $xRechnung = true;
+                    break;
                 default:
                     throw new LexofficeException('lexoffice-php-api: unknown mime/type "'.$request['header']['content_type'].'". Check details via $e->get_error()', ['voucher_id' => $uuid, 'response' => $request]);
             }
@@ -965,8 +1010,19 @@ class LexofficeClient {
             $filename = $filename_prefix.'_'.$i.'.'.$extension;
             file_put_contents($filename, $body);
             $saved_files[] = $filename;
+
+            // get additional visual files
+            if ($xRechnung) {
+                $request = $this->api_call('GET', 'files', $uuid_file, 'application/pdf', '', true);
+                $body = substr($request['body'], $request['header']['header_size']);
+                $filename = $filename_prefix.'_'.$i.'.pdf';
+                file_put_contents($filename, $body);
+                $saved_files[] = $filename;
+            }
+
             $i++;
         }
+
         return $saved_files;
     }
 
@@ -998,7 +1054,9 @@ class LexofficeClient {
     /**
      * @throws LexofficeException
      */
-    public function update_contact($uuid, $data) {
+    public function update_contact($uuid, array|object $data) {
+        if (is_object($data)) $data = json_decode(json_encode($data, true), true);
+        $data = $this->validate_contact_data($data);
         return $this->api_call('PUT', 'contacts', $uuid, $data);
     }
 
@@ -1040,13 +1098,23 @@ class LexofficeClient {
                         ['\_', '\%'],
                         rawurldecode($filter)
                     );
+                    if ($filter === htmlspecialchars_decode($filter, ENT_NOQUOTES)) {
+                        $filter = htmlspecialchars($filter, ENT_NOQUOTES);
+                    }
                     $filter = rawurlencode($filter);
                 }
             }
 
             // check if is not already encoded
             if (strpos($filter, '%') === false || $filter == rawurldecode($filter)) {
+                if ($filter === htmlspecialchars_decode($filter, ENT_NOQUOTES)) {
+                    $filter = htmlspecialchars($filter, ENT_NOQUOTES);
+                }
                 $filter = rawurlencode($filter);
+            }
+            //if urlencoded, but not html
+            elseif (rawurldecode($filter) == htmlspecialchars_decode(rawurldecode($filter), ENT_NOQUOTES)) {
+                $filter = rawurlencode(htmlspecialchars(rawurldecode($filter), ENT_NOQUOTES));
             }
 
             // replace spacer | sometimes on appended lastname which is already encoded and skipped above
@@ -1079,7 +1147,7 @@ class LexofficeClient {
         if (filesize($file) > 5*1024*1024) throw new LexofficeException('lexoffice-php-api: filesize to big', ['file' => $file, 'filesize' => filesize($file).' byte']);
         // use mimetype type from filename
         if (
-            in_array(substr(strtolower($file), -4), ['.pdf', '.jpg', '.png']) ||
+            in_array(substr(strtolower($file), -4), ['.pdf', '.jpg', '.png', '.xml']) ||
             in_array(substr(strtolower($file), -5), ['.jpeg'])
         ) {
             return $this->api_call('POST', 'files', '', ['file' => new CURLFile($file), 'type' => 'voucher']);
@@ -1097,6 +1165,10 @@ class LexofficeClient {
             case 'image/jpeg':
                 $dummy_title = 'dummy.jpg';
                 break;
+            case 'application/xml':
+            case 'text/xml':
+                $dummy_title = 'dummy.xml';
+                break;
             default:
                 throw new LexofficeException('lexoffice-php-api: invalid mime type', ['file' => $file]);
         }
@@ -1111,7 +1183,7 @@ class LexofficeClient {
         if (filesize($file) > 5*1024*1024) throw new LexofficeException('lexoffice-php-api: filesize to big', ['file' => $file, 'filesize' => filesize($file).' byte']);
         // use mimetype type from filename
         if (
-            in_array(substr(strtolower($file), -4), ['.pdf', '.jpg', '.png']) ||
+            in_array(substr(strtolower($file), -4), ['.pdf', '.jpg', '.png', '.xml']) ||
             in_array(substr(strtolower($file), -5), ['.jpeg'])
         ) {
             return $this->api_call('POST', 'vouchers', $uuid, ['file' => new CURLFile($file)], '/files');
@@ -1128,6 +1200,10 @@ class LexofficeClient {
                 break;
             case 'image/jpeg':
                 $dummy_title = 'dummy.jpg';
+                break;
+            case 'application/xml':
+            case 'text/xml':
+                $dummy_title = 'dummy.xml';
                 break;
             default:
                 throw new LexofficeException('lexoffice-php-api: invalid mime type', ['file' => $file]);
@@ -1286,6 +1362,16 @@ class LexofficeClient {
         }
     }
 
+    public function get_needed_tax_type(string $customer_country_code, string $vat_id, bool $physical_good, int $timestamp): string {
+        if (strtoupper($customer_country_code) === 'DE') return 'net';
+        if (!empty($vat_id) && $this->is_european_member($customer_country_code, $timestamp)) return 'intraCommunitySupply';
+        if (!$this->is_european_member($customer_country_code, $timestamp)) {
+            if ($physical_good) return 'thirdPartyCountryDelivery';
+            return 'thirdPartyCountryService';
+        }
+        return 'net';
+    }
+
     /**
      * Returns an array with the possible taxrates for the given country
      * @param string $country_code  2-letter country code
@@ -1350,7 +1436,7 @@ class LexofficeClient {
         // overwrite until 01.07.2021, no OSS needed so german taxes should give back
         if ($date <= 1625090400 && strtoupper($country_code) != 'DE') return $this->get_taxrates('DE', $date);
 
-        // luxemburg temporary inflation tax change (01.01.2021 - 31.12.2022)
+        // luxemburg temporary inflation tax change (01.01.2021 - 31.12.2023)
         if (strtoupper($country_code) === 'LU' && $date >= 1672531200 && $date <= 1703977199) {
             $taxrates['default'] = 16;
             $taxrates['reduced'] = [0, 3, 7, 13];
@@ -1436,10 +1522,39 @@ class LexofficeClient {
         }
     }
 
+    public function valid_vat_id($vat_id) {
+        $vat_id = trim($vat_id);
+        $country_chars = substr($vat_id, 0, 2);
+        $vat_id_length = strlen($vat_id);
+
+        return (
+            $country_chars === 'GB' && $vat_id_length === 7 ||
+            in_array($country_chars, array('CZ', 'DK', 'FI', 'HU', 'IE', 'LU', 'MT', 'SI')) && $vat_id_length === 10 ||
+            in_array($country_chars, array('AT', 'BG', 'CY', 'CZ', 'DE', 'EE', 'EL', 'ES', 'GB', 'IE', 'LT', 'PT', 'RO')) && $vat_id_length === 11 ||
+            in_array($country_chars, array('BE', 'BG', 'CZ', 'PL', 'SK')) && $vat_id_length === 12 ||
+            in_array($country_chars, array('FR', 'HR', 'IT', 'LV')) && $vat_id_length === 13 ||
+            in_array($country_chars, array('GB', 'LT', 'NL', 'SE')) && $vat_id_length === 14
+        );
+    }
+
     private function validate_contact_data(array $data): array {
         if (isset($data['company']['name']) && empty($data['company']['name'])) $data['company']['name'] = '-- ohne Firmenname --';
         if (isset($data['person']['firstName']) && empty($data['person']['firstName'])) $data['person']['firstName'] = '-- ohne Vorname --';
         if (isset($data['person']['lastName']) && empty($data['person']['lastName'])) $data['person']['lastName'] = '-- ohne Nachname --';
+        if (!empty($data['company']['vatRegistrationId']) && !$this->valid_vat_id($data['company']['vatRegistrationId'])) unset($data['company']['vatRegistrationId']);
+
+        // fix to long salutations
+        if (!empty($data['person']['salutation']) && strlen($data['person']['salutation'] > 25)) {
+            if (str_contains($data['person']['salutation'], 'Frau')) {
+                $data['person']['salutation'] = 'Frau';
+            }
+            elseif (str_contains($data['person']['salutation'], 'Herr')) {
+                $data['person']['salutation'] = 'Herr';
+            }
+            else {
+                $data['person']['salutation'] = substr($data['person']['salutation'], 0, 25);
+            }
+        }
 
         // separate multiple phonenumbers in one field
         $phone_numbers_types = ['business', 'office', 'mobile', 'private', 'fax', 'other'];
@@ -1477,11 +1592,19 @@ class LexofficeClient {
         foreach ($phone_numbers_types as $type) {
             if (empty($data['phoneNumbers'][$type])) continue;
             foreach ($data['phoneNumbers'][$type] as $key => $number) {
-                if (strlen($data['phoneNumbers'][$type][$key] > 30)) unset($data['phoneNumbers'][$type][$key]);
+                if (strlen($data['phoneNumbers'][$type][$key]) > 30) unset($data['phoneNumbers'][$type][$key]);
             }
             $data['phoneNumbers'][$type] = array_values($data['phoneNumbers'][$type]);
         }
 
+        // remove empty numbers
+        foreach ($phone_numbers_types as $type) {
+            if (empty($data['phoneNumbers'][$type])) continue;
+            foreach ($data['phoneNumbers'][$type] as $key => $number) {
+                if (empty($data['phoneNumbers'][$type][$key])) unset($data['phoneNumbers'][$type][$key]);
+            }
+            $data['phoneNumbers'][$type] = array_values($data['phoneNumbers'][$type]);
+        }
 
         // respect lexoffice issue
         // it's only possible to create and change contacts with a
@@ -1494,6 +1617,52 @@ class LexofficeClient {
             $data['phoneNumbers'][$type][] = trim($tmp);
         }
 
+        // validation for contactPersons in company
+        if (!empty($data['company']['contactPersons'])) {
+            foreach ($data['company']['contactPersons'] as $key => $person) {
+                // fix to long salutations
+                if (!empty($person['salutation']) && strlen($person['salutation'] > 25)) {
+                    if (str_contains($person['salutation'], 'Frau')) {
+                        $data['company']['contactPersons'][$key]['salutation'] = 'Frau';
+                    }
+                    elseif (str_contains($person['salutation'], 'Herr')) {
+                        $data['company']['contactPersons'][$key]['salutation'] = 'Herr';
+                    }
+                    else {
+                        $data['company']['contactPersons'][$key]['salutation'] = substr($person['salutation'], 0, 25);
+                    }
+                }
+                if (empty($person['firstName'])) $data['company']['contactPersons'][$key]['firstName'] = '-- ohne Vorname --';
+                if (empty($person['lastName'])) $data['company']['contactPersons'][$key]['lastName'] = '-- ohne Nachname --';
+            }
+        }
+
+        // validation for contactPersons number in company
+        if (isset($data['company']['contactPersons'][0]['phoneNumber'])) {
+            $data['company']['contactPersons'][0]['phoneNumber'] = trim(preg_replace('/[A-Za-z]/', '', $data['company']['contactPersons'][0]['phoneNumber']));
+            //if delimeters - leave first correct number
+            foreach ($delimiters as $delimiter) {
+                if (stripos($data['company']['contactPersons'][0]['phoneNumber'], $delimiter) === false) continue;
+                $tmp = explode($delimiter, $data['company']['contactPersons'][0]['phoneNumber']);
+                foreach ($tmp as $tmp_item) {
+                    if (empty($tmp_item)) continue;
+                    $data['company']['contactPersons'][0]['phoneNumber'] = trim($tmp_item);
+                    break;
+                }
+            }
+            if (empty($data['company']['contactPersons'][0]['phoneNumber']) || strlen($data['company']['contactPersons'][0]['phoneNumber']) > 30)
+                unset($data['company']['contactPersons'][0]['phoneNumber']);
+        }
+
+        if (isset($data['company']['contactPersons'][0]['emailAddress'])) {
+            $email = idn_to_ascii(mb_strtolower($data['company']['contactPersons'][0]['emailAddress']));
+            if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                unset($data['company']['contactPersons'][0]['emailAddress']);
+            }
+            else {
+                $data['company']['contactPersons'][0]['emailAddress'] = mb_strtolower($data['company']['contactPersons'][0]['emailAddress']);
+            }
+        }
 
         $email_types = ['business', 'office', 'private', 'other'];
         // remove empty values from nested emailAddresses array
@@ -1501,8 +1670,15 @@ class LexofficeClient {
             if (!isset($data['emailAddresses'][$type])) continue;
 
             foreach ($data['emailAddresses'][$type] as $key => $email) {
-                if (empty($email)) unset($data['emailAddresses'][$type][$key]);
+                $email = idn_to_ascii(mb_strtolower($email));
+                if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    unset($data['emailAddresses'][$type][$key]);
+                }
+                else {
+                    $data['emailAddresses'][$type][$key] = mb_strtolower($data['emailAddresses'][$type][$key]);
+                }
             }
+
             if (count($data['emailAddresses'][$type]) === 0) {
                 unset($data['emailAddresses'][$type]);
             }
@@ -1552,5 +1728,30 @@ class LexofficeClient {
      */
     public function create_credit_note($data, $finalized = false) {
         return $this->create_creditnote($data, $finalized);
+    }
+
+    public function test_set_profile($taxType = 'net', $smallBusiness = false, $distanceSalesPrinciple = 'ORIGIN') {
+        $profile = [
+            'organizationId' => null,
+            'companyName' => 'Testname',
+            'created' => [
+                'userId' => null,
+                'userName' => null,
+                'userEmail' => null,
+                'date' => null
+            ],
+            'connectionId' => null,
+            'features' => [],
+            'businessFeatures' => [],
+            'subscriptionStatus' => 'active',
+            'taxType' => $taxType,
+            'smallBusiness' => $smallBusiness,
+            'distanceSalesPrinciple' => $distanceSalesPrinciple
+        ];
+        $this->cache_profile = (object) $profile;
+    }
+
+    public function test_clear_profile() {
+        $this->cache_profile = null;
     }
 }

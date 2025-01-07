@@ -1,19 +1,15 @@
 <?php
-
-use BaebecaSolutions\LexofficePhpApi\LexofficeClient;
-
-require_once(__DIR__.'/../LexofficeClient.php');
+require(__DIR__.'/../lexoffice-php-api.php');
 
 // if local developer test include secret api keys
-if (is_file(__DIR__.'/../_local_test_settings.php')) {
-	require_once(__DIR__.'/../_local_test_settings.php');
+if (is_file(__DIR__.'/_local_settings.php')) {
+	require(__DIR__.'/_local_settings.php');
 } else {
-	exit('no "_local_test_settings.php" found in root doc');
+	exit('no "/tests/_local_settings.php" found');
 }
 
-/** local test configuration */
-#$run_specific_test = 11;
-$debug = true;
+if (!isset($run_specific_test)) exit('$run_specific_test not defined');
+if (!isset($debug)) exit('$debug not defined');
 
 // enable your current oss config
 #$oss_config = 'origin';

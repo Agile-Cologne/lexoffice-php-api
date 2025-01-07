@@ -1,2 +1,4 @@
 .idea/
+/tests/_local_settings.php
+/tests/tests/tmp/
 vendor/**
