@@ -1,5 +1,7 @@
 <?php
 
+use BaebecaSolutions\LexofficePhpApi\LexofficeException;
+
 test_start('upload voucher');
 try {
 	$request = $lexoffice->upload_file(__DIR__.'\files\cat.jpg');

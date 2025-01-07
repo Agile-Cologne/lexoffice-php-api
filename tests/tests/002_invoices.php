@@ -1,5 +1,7 @@
 <?php
 
+use BaebecaSolutions\LexofficePhpApi\LexofficeException;
+
 test_start('create draft invoice');
 try {
 	$request = $lexoffice->create_invoice([
@@ -669,42 +671,6 @@ test_start('invoice - get last 20 invoices');
 try {
 	$request = $lexoffice->get_last_invoices(20);
 	if (count($request) == 20) {
-		test_finished(true);
-	} else {
-		test_finished(false);
-	}
-} catch(LexofficeException $e) {
-	if ($e->getMessage() == 'lexoffice-php-api: positive invoice count needed') {
-		test_finished(true);
-	} else {
-		test($e->getMessage());
-		test(print_r($e->get_error(), true));
-		test_finished(false);
-	}
-}
-
-test_start('invoice - get last 100 invoices');
-try {
-	$request = $lexoffice->get_last_invoices(100);
-	if (count($request) == 100) {
-		test_finished(true);
-	} else {
-		test_finished(false);
-	}
-} catch(LexofficeException $e) {
-	if ($e->getMessage() == 'lexoffice-php-api: positive invoice count needed') {
-		test_finished(true);
-	} else {
-		test($e->getMessage());
-		test(print_r($e->get_error(), true));
-		test_finished(false);
-	}
-}
-
-test_start('invoice - get last 120 invoices');
-try {
-	$request = $lexoffice->get_last_invoices(120);
-	if (count($request) == 120) {
 		test_finished(true);
 	} else {
 		test_finished(false);

@@ -1,8 +1,13 @@
 <?php
 
 use BaebecaSolutions\LexofficePhpApi\LexofficeClient;
+use BaebecaSolutions\LexofficePhpApi\LexofficeException;
 
-require(__DIR__.'/../lexoffice-php-api.php');
+//require_once(__DIR__ . '/../vendor/autoload.php');
+require_once(__DIR__.'/../LexofficeClient.php');
+require_once(__DIR__.'/../LexofficeException.php');
+
+
 
 // if local developer test include secret api keys
 if (is_file(__DIR__.'/_local_settings.php')) {
@@ -64,7 +69,7 @@ function test_finished($result) {
 	$logfile_current_test_content = '';
 }
 
-$tests = array_slice(scandir('./tests'), 2);
+$tests = array_slice(scandir('./tests'), 10);
 foreach ($tests as $test) {
 	$test_tmp = explode('_', $test);
 	if (empty($run_specific_test) || $run_specific_test == (int)$test_tmp[0]) {

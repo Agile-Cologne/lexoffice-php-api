@@ -1,5 +1,7 @@
 <?php
 
+use BaebecaSolutions\LexofficePhpApi\LexofficeException;
+
 test_start('create contact - private person');
 try {
 	$request = $lexoffice->create_contact(array(

@@ -1,4 +1,7 @@
 <?php
+
+use BaebecaSolutions\LexofficePhpApi\LexofficeException;
+
 test_start('create draft invoice and download pdf (not possible)');
 try {
 	$request = $lexoffice->create_invoice([
